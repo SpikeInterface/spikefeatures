@@ -1,0 +1,19 @@
+language: python
+cache: pip
+os:
+- linux
+python:
+- '3.6'
+install:
+- pip install numpy scipy pandas
+- pip install .
+- pip install pytest==4.3
+script: python -m pytest
+#deploy:
+#  provider: pypi
+#  twine_version: 1.12.1
+#  user: alejoe91
+#  on:
+#    tags: true
+#  password:
+#    secure: KAALoQ6+LGKVQbfbUOVylTOEwh6eqvhi/Tx9zs7uBP68ny8z4q/UrdVUa1DrgBtOgrQMJHo2CUOIlMCCgbcMVF9ChyLqVA2PNQIJuvoEzhdRSvRArbe6BOol2mo3VkUPgEvLEIw40Es44zSC8xtWjTkiJKgHs5AW/H2cbfgyAPgvT58+CUIXn51tgSDMUo2zYVDr9pmoJpq+EzFWYTl+zLWvBQRRCAqb3k+S+Z6rhYVkgmq3C6z04aPeo+S2TeXvkPgebC86+OJPRox8tLJkR7/LS5d5MqB8MK34NYlXXPN/jev4JvJ3YBBApoO9fobq1zrkhlcjKwz23wb3AMe2jOFHNXYRZBJbLRoIuO63lwET2eWrSq99oCh75ozZvT5WaYyo+HEaR3QbPUlSsbz7aFvs+S45ZzHvINB0o8YrDzCX8lCcVHSIkFmXhLQU78qfi6mMqXyEZGckao9X1HAq1qZ5zGOsZaeiI97FVARLdVJBIIKcmRhGS+cDbX32cF4N20p9kDWL79cJ3LccmBiR6R+K99uQNUBHGM2L0rD92GIdEsOBUZP8ZXcPLVkP+7+c91zvh+LgHKwcwmPXKGUfpT4Uf8oP3PTpn4Kn4w7Xs2tkEcuU/DAMAkddkOT9T1LHjYg08of7ov79FMtEJ0ojFnSBNapxFZMbuAvwe2AZjpY=
