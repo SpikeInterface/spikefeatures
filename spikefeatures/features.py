@@ -68,11 +68,19 @@ def calculate_features(waveforms, sampling_frequency, feature_names=None,
 
 
 def peak_to_valley(waveforms, sampling_frequency):
-    """ time in s between throug and peak
+    """ Distance between trough and peak
 
-    :param waveforms: numpy.ndarray (num_waveforms x num_samples)
-    :param sampling_frequency: rate at which the waveforms are sampled (Hz)
-    :return: peak_to_valley; np.ndarray (num_waveforms)
+    Parameters
+    ----------
+    waveforms  : numpy.ndarray (num_waveforms x num_samples)
+        waveforms to compute feature for
+    sampling_frequency  : float
+        rate at which the waveforms are sampled (Hz)
+
+    Returns
+    -------
+    peak_to_valley; np.ndarray (num_waveforms)
+
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
     ptv = (peak_idx - trough_idx) * (1/sampling_frequency)
@@ -80,10 +88,21 @@ def peak_to_valley(waveforms, sampling_frequency):
 
 
 def peak_trough_ratio(waveforms):
-    """ waveform peak height / trough depth
+    """ Ratio peak heigth and trough depth
 
-    :param waveforms: numpy.ndarray (num_waveforms x num_samples)
-    :return: peak_trough_ratio; np.ndarray (num_waveforms)
+    Assumes baseline is 0
+
+    Parameters
+    ----------
+    waveforms  : numpy.ndarray (num_waveforms x num_samples)
+        waveforms to compute feature for
+
+    Returns
+    -------
+
+    np.ndarray (num_waveforms)
+        Peak to trough ratio
+
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
     ptratio = np.empty(trough_idx.shape[0])
@@ -93,12 +112,28 @@ def peak_trough_ratio(waveforms):
 
 
 def halfwidth(waveforms, sampling_frequency, return_idx=False):
-    """ Width of the waveform peak at its half ampltude heigth
+    """
+    Width of waveform at its half of amplitude
 
-    :param return_idx: bool, if true return halfwidth, index of crossing threhold pre peak, index of crossing post peak
-    :param waveforms: numpy.ndarray (num_waveforms x num_samples)
-    :param sampling_frequency: rate at which the waveforms are sampled (Hz)
-    :return: peak_to_valley; np.ndarray (num_waveforms)
+    Computes the width of the waveform peak at half it's height
+
+    Parameters
+    ----------
+    waveforms  : numpy.ndarray (num_waveforms x num_samples)
+        waveforms to compute features for
+    sampling_frequency  : float
+        rate at which the waveforms are sampled (Hz)
+    return_idx : bool
+        if true, also returns index of threshold crossing before and
+        index of threshold crossing after peak
+
+    Returns
+    -------
+
+    np.ndarray or (np.ndarray, np.ndarray, np.ndarray)
+        Halfwidth of the waveforms or (Halfwidth of the waveforms,
+        index_cross_pre_peak, index_cross_post_peak)
+
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
     hw = np.empty(waveforms.shape[0])
@@ -126,12 +161,32 @@ def halfwidth(waveforms, sampling_frequency, return_idx=False):
 
 
 def repolarization_slope(waveforms, sampling_frequency, return_idx=False):
-    """ waveform slope between trough and first crossing of baseline thereafter
+    """
+    Return slope of repolarization period between trough and baseline
 
-    :param return_idx: bool, if true return halfwidth, index of crossing baseline after trough
-    :param waveforms: numpy.ndarray (num_waveforms x num_samples)
-    :param sampling_frequency: rate at which the waveforms are sampled (Hz)
-    :return: repolarization slope; np.ndarray (num_waveforms)
+    After reaching it's maxumum polarization, the neuron potential will
+    recover. The repolarization slope is defined as the dV/dT of the action potential
+    between trough and baseline.
+
+    Optionally the function returns also the indices per waveform where the
+    potential crosses baseline.
+
+    Parameters
+    ----------
+    waveforms  : numpy.ndarray (num_waveforms x num_samples)
+        waveforms to compute features for
+    sampling_frequency  : float
+        rate at which the waveforms are sampled (Hz)
+    return_idx : bool
+        if true, also returns index of threshold crossing before and
+        index of threshold crossing after peak
+
+    Returns
+    -------
+
+    np.ndarray or (np.ndarray, np.ndarray, np.ndarray)
+        Halfwidth of the waveforms or (Halfwidth of the waveforms,
+        index_cross_pre_peak, index_cross_post_peak)
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
 
@@ -155,12 +210,32 @@ def repolarization_slope(waveforms, sampling_frequency, return_idx=False):
 
 
 def recovery_slope(waveforms, sampling_frequency, window):
-    """ slope of waveform after peak, within specified window
+    """
+    Return the recovery slope of input waveforms. After repolarization,
+    the neuron hyperpolarizes untill it peaks. The recovery slope is the
+    slope of the actiopotential after the peak, returning to the baseline
+    in dV/dT. The slope is computed within a user-defined window after
+    the peak.
 
-    :param waveforms: numpy.ndarray (num_waveforms x num_samples)
-    :param sampling_frequency: rate at which the waveforms are sampled (Hz)
-    :param window: windowlength in ms after peak wherein recovery slope is computed
-    :return: peak_to_valley; np.ndarray (num_waveforms)
+    Takes a numpy array of waveforms and returns an array with
+    recovery slopes per waveform.
+
+    Parameters
+    ----------
+    waveforms  : numpy.ndarray (num_waveforms x num_samples)
+        waveforms to compute features for
+    sampling_frequency  : float
+        rate at which the waveforms are sampled (Hz)
+    window : float
+        length after peak wherein to compyte recovery slope (ms)
+
+
+    Returns
+    -------
+
+    np.ndarray or (np.ndarray, np.ndarray, np.ndarray)
+        Halfwidth of the waveforms or (Halfwidth of the waveforms,
+        index_cross_pre_peak, index_cross_post_peak)
     """
     _, peak_idx = _get_trough_and_peak_idx(waveforms)
     rslope = np.empty(waveforms.shape[0])
@@ -175,21 +250,19 @@ def recovery_slope(waveforms, sampling_frequency, window):
 
 
 def _get_slope(x, y):
-    """ slope of x and y data
-
-    :param x: np.ndarray (n_samples)
-    :param y: np.ndarray (n_samples)
-    :return: scipy.linregress output (slope, intercept, rvalue, pvalue, stderr)
+    """
+    Retrun the slope of x and y data, using scipy.signal.linregress
     """
     slope = linregress(x, y)
     return slope
 
 
 def _get_trough_and_peak_idx(waveform):
-    """ detect trough and peak in waveform, peak always after trough
+    """
+    Return the indices into the input waveforms of the detected troughs (minimum of waveform)
+    and peaks (maximum of waveform, after trough).
 
-    :param waveform: np.ndarray (num_samples)
-    :return: index_of_trough, index_of_peak
+    Assumes negative troughs and positive peaks
     """
     trough_idx = np.argmin(waveform, axis=1)
     peak_idx = np.empty(trough_idx.shape, dtype=int)
