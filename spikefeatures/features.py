@@ -1,7 +1,7 @@
 """
 Functions based on
 https://github.com/AllenInstitute/ecephys_spike_sorting/blob/master/ecephys_spike_sorting/modules/mean_waveforms/waveform_metrics.py
-15/04/2020
+22/04/2020
 """
 
 import numpy as np
@@ -25,7 +25,7 @@ def calculate_features(waveforms, sampling_frequency, feature_names=None,
     feature_names : list or None (if None, compute all)
         features to compute
     recovery_slope_window : float
-        windowlength after peak wherein recovery slope is computed
+        windowlength in ms after peak wherein recovery slope is computed
 
     Returns
     -------
@@ -68,11 +68,11 @@ def calculate_features(waveforms, sampling_frequency, feature_names=None,
 
 
 def peak_to_valley(waveforms, sampling_frequency):
-    """
+    """ time in s between throug and peak
 
-    :param waveforms:
-    :param sampling_frequency:
-    :return:
+    :param waveforms: numpy.ndarray (num_waveforms x num_samples)
+    :param sampling_frequency: rate at which the waveforms are sampled (Hz)
+    :return: peak_to_valley; np.ndarray (num_waveforms)
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
     ptv = (peak_idx - trough_idx) * (1/sampling_frequency)
@@ -80,10 +80,10 @@ def peak_to_valley(waveforms, sampling_frequency):
 
 
 def peak_trough_ratio(waveforms):
-    """ peak height / trough depth
+    """ waveform peak height / trough depth
 
-    :param waveforms:
-    :return:
+    :param waveforms: numpy.ndarray (num_waveforms x num_samples)
+    :return: peak_trough_ratio; np.ndarray (num_waveforms)
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
     ptratio = np.empty(trough_idx.shape[0])
@@ -93,11 +93,12 @@ def peak_trough_ratio(waveforms):
 
 
 def halfwidth(waveforms, sampling_frequency, return_idx=False):
-    """ Width of the peak at its half ampltude heigth
+    """ Width of the waveform peak at its half ampltude heigth
 
-    :param waveforms:
-    :param sampling_frequency:
-    :return:
+    :param return_idx: bool, if true return halfwidth, index of crossing threhold pre peak, index of crossing post peak
+    :param waveforms: numpy.ndarray (num_waveforms x num_samples)
+    :param sampling_frequency: rate at which the waveforms are sampled (Hz)
+    :return: peak_to_valley; np.ndarray (num_waveforms)
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
     hw = np.empty(waveforms.shape[0])
@@ -106,7 +107,7 @@ def halfwidth(waveforms, sampling_frequency, return_idx=False):
 
     for i in range(waveforms.shape[0]):
         peak_val = waveforms[i, peak_idx[i]]
-        threshold = 0.5 * peak_val
+        threshold = 0.5 * peak_val  # threshold is half of peak heigth (assuming baseline is 0)
 
         cpre_idx = np.where(waveforms[i, :peak_idx[i]] < threshold)[0]
         cpost_idx = np.where(waveforms[i, peak_idx[i]:] < threshold)[0]
@@ -125,11 +126,12 @@ def halfwidth(waveforms, sampling_frequency, return_idx=False):
 
 
 def repolarization_slope(waveforms, sampling_frequency, return_idx=False):
-    """
+    """ waveform slope between trough and first crossing of baseline thereafter
 
-    :param waveforms:
-    :param sampling_frequency:
-    :return:
+    :param return_idx: bool, if true return halfwidth, index of crossing baseline after trough
+    :param waveforms: numpy.ndarray (num_waveforms x num_samples)
+    :param sampling_frequency: rate at which the waveforms are sampled (Hz)
+    :return: repolarization slope; np.ndarray (num_waveforms)
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
 
@@ -153,17 +155,12 @@ def repolarization_slope(waveforms, sampling_frequency, return_idx=False):
 
 
 def recovery_slope(waveforms, sampling_frequency, window):
-    """
+    """ slope of waveform after peak, within specified window
 
-    Parameters
-    ----------
-    waveforms : numpy.ndarray [n_template x n_samples]
-    fs : samplerate in Hz
-    sampling_frequency : duration after peak to include for regression
-
-    Returns
-    -------
-
+    :param waveforms: numpy.ndarray (num_waveforms x num_samples)
+    :param sampling_frequency: rate at which the waveforms are sampled (Hz)
+    :param window: windowlength in ms after peak wherein recovery slope is computed
+    :return: peak_to_valley; np.ndarray (num_waveforms)
     """
     _, peak_idx = _get_trough_and_peak_idx(waveforms)
     rslope = np.empty(waveforms.shape[0])
@@ -177,18 +174,23 @@ def recovery_slope(waveforms, sampling_frequency, window):
     return rslope
 
 
-def _get_slope(time, waveform):
-    """
+def _get_slope(x, y):
+    """ slope of x and y data
 
-    :param time:
-    :param waveform:
-    :return:
+    :param x: np.ndarray (n_samples)
+    :param y: np.ndarray (n_samples)
+    :return: scipy.linregress output (slope, intercept, rvalue, pvalue, stderr)
     """
-    slope = linregress(time, waveform)
+    slope = linregress(x, y)
     return slope
 
 
 def _get_trough_and_peak_idx(waveform):
+    """ detect trough and peak in waveform, peak always after trough
+
+    :param waveform: np.ndarray (num_samples)
+    :return: index_of_trough, index_of_peak
+    """
     trough_idx = np.argmin(waveform, axis=1)
     peak_idx = np.empty(trough_idx.shape, dtype=int)
     for i, tridx in enumerate(trough_idx):
