@@ -289,12 +289,10 @@ def _get_trough_and_peak_idx(waveform):
     Returns 0 if not detected
     """
     trough_idx = np.argmin(waveform, axis=1)
-    peak_idx = np.empty(trough_idx.shape, dtype=int)  # int, these are used for indexing
-    peak_idx[:] = np.nan
+    peak_idx = np.zeros(trough_idx.shape, dtype=int)  # int, these are used for indexing
+
     for i, tridx in enumerate(trough_idx):
         if tridx == waveform.shape[1]-1:
-            trough_idx[i] = 0
-            peak_idx[i] = 0
             continue
         idx = np.argmax(waveform[i, tridx:])
         peak_idx[i] = idx + tridx
