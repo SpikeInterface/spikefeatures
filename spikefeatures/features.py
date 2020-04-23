@@ -151,18 +151,19 @@ def halfwidth(waveforms, sampling_frequency, return_idx=False):
             cross_pre_pk[i] = 0
             cross_post_pk[i] = 0
             continue
-        peak_val = waveforms[i, peak_idx[i]]
-        threshold = 0.5 * peak_val  # threshold is half of peak heigth (assuming baseline is 0)
+        trough_val = waveforms[i, trough_idx[i]]
+        threshold = 0.5 * trough_val  # threshold is half of peak heigth (assuming baseline is 0)
 
-        cpre_idx = np.where(waveforms[i, :peak_idx[i]] < threshold)[0]
-        cpost_idx = np.where(waveforms[i, peak_idx[i]:] < threshold)[0]
+        cpre_idx = np.where(waveforms[i, :trough_idx[i]] < threshold)[0]
+        cpost_idx = np.where(waveforms[i, trough_idx[i]:] < threshold)[0]
 
         if len(cpre_idx) == 0 or len(cpost_idx) == 0:
             continue
 
-        cross_pre_pk[i] = cpre_idx[-1] + 1  # last occurence of waveform lower than thr, before peak
-        cross_post_pk[i] = cpost_idx[0] - 1 + peak_idx[i]  # first occurence of waveform lower than peak, after peak
-        hw[i] = (cross_post_pk[i] - cross_pre_pk[i] + peak_idx[i]) * (1/sampling_frequency)
+        cross_pre_pk[i] = cpre_idx[0] - 1  # last occurence of waveform lower than thr, before peak
+        cross_post_pk[i] = cpost_idx[-1] + 1 + trough_idx[i]  # first occurence of waveform lower than peak, after peak
+
+        hw[i] = (cross_post_pk[i] - cross_pre_pk[i]) * (1/sampling_frequency) # + peak_idx[i]
 
     if not return_idx:
         return hw
@@ -289,8 +290,7 @@ def _get_trough_and_peak_idx(waveform):
     Returns 0 if not detected
     """
     trough_idx = np.argmin(waveform, axis=1)
-    peak_idx = np.empty(trough_idx.shape, dtype=int)  # int, these are used for indexing
-    peak_idx[:] = np.nan
+    peak_idx = -1 * np.ones(trough_idx.shape, dtype=int)  # int, these are used for indexing
     for i, tridx in enumerate(trough_idx):
         if tridx == waveform.shape[1]-1:
             trough_idx[i] = 0
