@@ -68,7 +68,7 @@ def calculate_features(waveforms, sampling_frequency, feature_names=None,
 
 
 def peak_to_valley(waveforms, sampling_frequency):
-    """ Distance between trough and peak
+    """ Time between trough and peak
 
     Parameters
     ----------
@@ -79,11 +79,12 @@ def peak_to_valley(waveforms, sampling_frequency):
 
     Returns
     -------
-    peak_to_valley; np.ndarray (num_waveforms)
+    peak_to_valley in seconds; np.ndarray (num_waveforms)
 
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
     ptv = (peak_idx - trough_idx) * (1/sampling_frequency)
+    ptv[ptv == 0] = np.nan
     return ptv
 
 
@@ -106,8 +107,12 @@ def peak_trough_ratio(waveforms):
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
     ptratio = np.empty(trough_idx.shape[0])
-    for i, (thidx, pkidx) in enumerate(zip(trough_idx, peak_idx)):
-        ptratio[i] = waveforms[i, pkidx] / waveforms[i, thidx]
+    ptratio[:] = np.nan
+    for i in range(waveforms.shape[0]):
+        if peak_idx[i] == 0 and trough_idx[i] == 0:
+            continue
+        ptratio[i] = waveforms[i, peak_idx[i]] / waveforms[i, trough_idx[i]]
+
     return ptratio
 
 
@@ -137,10 +142,15 @@ def halfwidth(waveforms, sampling_frequency, return_idx=False):
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
     hw = np.empty(waveforms.shape[0])
-    cross_pre_pk = np.empty(waveforms.shape[0], dtype=np.int)
-    cross_post_pk = np.empty(waveforms.shape[0], dtype=np.int)
+    hw[:] = np.nan
+    cross_pre_pk = np.empty(waveforms.shape[0], dtype=int)
+    cross_post_pk = np.empty(waveforms.shape[0], dtype=int)
 
     for i in range(waveforms.shape[0]):
+        if peak_idx[i] == 0:
+            cross_pre_pk[i] = 0
+            cross_post_pk[i] = 0
+            continue
         peak_val = waveforms[i, peak_idx[i]]
         threshold = 0.5 * peak_val  # threshold is half of peak heigth (assuming baseline is 0)
 
@@ -170,7 +180,7 @@ def repolarization_slope(waveforms, sampling_frequency, return_idx=False):
 
     Optionally the function returns also the indices per waveform where the
     potential crosses baseline.
-
+    
     Parameters
     ----------
     waveforms  : numpy.ndarray (num_waveforms x num_samples)
@@ -191,15 +201,23 @@ def repolarization_slope(waveforms, sampling_frequency, return_idx=False):
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
 
     rslope = np.empty(waveforms.shape[0])
+    rslope[:] = np.nan
     return_to_base_idx = np.empty(waveforms.shape[0], dtype=np.int)
+    return_to_base_idx[:] = 0
 
     time = np.arange(0, waveforms.shape[1]) * (1/sampling_frequency)  # in s
     for i in range(waveforms.shape[0]):
+        if trough_idx[i] == 0:
+            continue
+
         rtrn_idx = np.where(waveforms[i, trough_idx[i]:] >= 0)[0]
         if len(rtrn_idx) == 0:
             continue
 
         return_to_base_idx[i] = rtrn_idx[0] + trough_idx[i]  # first time after  trough, where waveform is at baseline
+        
+        if return_to_base_idx[i] - trough_idx[i] < 3:
+            continue
         rslope[i] = linregress(time[trough_idx[i]:return_to_base_idx[i]],
                                waveforms[i, trough_idx[i]: return_to_base_idx[i]])[0]
 
@@ -239,9 +257,13 @@ def recovery_slope(waveforms, sampling_frequency, window):
     """
     _, peak_idx = _get_trough_and_peak_idx(waveforms)
     rslope = np.empty(waveforms.shape[0])
+    rslope[:] = np.nan
+
     time = np.arange(0, waveforms.shape[1]) * (1/sampling_frequency)  # in s
 
     for i in range(waveforms.shape[0]):
+        if peak_idx[i] == 0:
+            continue
         max_idx = int(peak_idx[i] + ((window/1000)*sampling_frequency))
         max_idx = np.min([max_idx, waveforms.shape[1]])
         slope = _get_slope(time[peak_idx[i]:max_idx], waveforms[i, peak_idx[i]:max_idx])
@@ -259,15 +281,20 @@ def _get_slope(x, y):
 
 def _get_trough_and_peak_idx(waveform):
     """
-    Return the indices into the input waveforms of the detected troughs (minimum of waveform)
-    and peaks (maximum of waveform, after trough).
+    Return the indices into the input waveforms of the detected troughs
+    (minimum of waveform) and peaks (maximum of waveform, after trough).
 
     Assumes negative troughs and positive peaks
+
+    Returns 0 if not detected
     """
     trough_idx = np.argmin(waveform, axis=1)
-    peak_idx = np.empty(trough_idx.shape, dtype=int)
+    peak_idx = np.empty(trough_idx.shape, dtype=int)  # int, these are used for indexing
+    peak_idx[:] = np.nan
     for i, tridx in enumerate(trough_idx):
         if tridx == waveform.shape[1]-1:
+            trough_idx[i] = 0
+            peak_idx[i] = 0
             continue
         idx = np.argmax(waveform[i, tridx:])
         peak_idx[i] = idx + tridx
