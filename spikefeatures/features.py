@@ -34,7 +34,7 @@ def calculate_features(waveforms, sampling_frequency, feature_names=None,
         one row per waveforms
 
     """
-    metrics = pd.DataFrame()
+    metrics = dict()
 
     if feature_names is None:
         feature_names = all_1D_features
