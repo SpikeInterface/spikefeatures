@@ -162,7 +162,7 @@ def halfwidth(waveforms, sampling_frequency, return_idx=False):
 
         cross_pre_pk[i] = cpre_idx[-1] + 1  # last occurence of waveform lower than thr, before peak
         cross_post_pk[i] = cpost_idx[0] - 1 + peak_idx[i]  # first occurence of waveform lower than peak, after peak
-        hw[i] = (cross_post_pk[i] - cross_pre_pk[i] + peak_idx[i]) * (1/sampling_frequency)
+        hw[i] = (cross_post_pk[i] - cross_pre_pk[i]) * (1/sampling_frequency)
 
     if not return_idx:
         return hw
