@@ -9,11 +9,11 @@ install:
 - pip install .
 - pip install pytest==4.3
 script: python -m pytest
-#deploy:
-#  provider: pypi
-#  twine_version: 1.12.1
-#  user: alejoe91
-#  on:
-#    tags: true
-#  password:
-#    secure: KAALoQ6+LGKVQbfbUOVylTOEwh6eqvhi/Tx9zs7uBP68ny8z4q/UrdVUa1DrgBtOgrQMJHo2CUOIlMCCgbcMVF9ChyLqVA2PNQIJuvoEzhdRSvRArbe6BOol2mo3VkUPgEvLEIw40Es44zSC8xtWjTkiJKgHs5AW/H2cbfgyAPgvT58+CUIXn51tgSDMUo2zYVDr9pmoJpq+EzFWYTl+zLWvBQRRCAqb3k+S+Z6rhYVkgmq3C6z04aPeo+S2TeXvkPgebC86+OJPRox8tLJkR7/LS5d5MqB8MK34NYlXXPN/jev4JvJ3YBBApoO9fobq1zrkhlcjKwz23wb3AMe2jOFHNXYRZBJbLRoIuO63lwET2eWrSq99oCh75ozZvT5WaYyo+HEaR3QbPUlSsbz7aFvs+S45ZzHvINB0o8YrDzCX8lCcVHSIkFmXhLQU78qfi6mMqXyEZGckao9X1HAq1qZ5zGOsZaeiI97FVARLdVJBIIKcmRhGS+cDbX32cF4N20p9kDWL79cJ3LccmBiR6R+K99uQNUBHGM2L0rD92GIdEsOBUZP8ZXcPLVkP+7+c91zvh+LgHKwcwmPXKGUfpT4Uf8oP3PTpn4Kn4w7Xs2tkEcuU/DAMAkddkOT9T1LHjYg08of7ov79FMtEJ0ojFnSBNapxFZMbuAvwe2AZjpY=
+deploy:
+  provider: pypi
+  twine_version: 1.12.1
+  user: alejoe91
+  on:
+    tags: true
+  password:
+    secure: jCoHWsWiD/PRDmPyZjTnVR8aVIsLZq9F/n+9kcNpvWv5RWACyKt+27DmT++SWwuVMqWovkBymZla1rq/V7+D1UzrhCZ+Eb/BpcJ0u7nLDmPUbaLeUxAwpwOxP3I9b5Xd4Jyoc9YY6FBDQJfz/kjmSznWDjK29pD3P8RiqKPRHlbUfA4AY0Lmlf4t0So8dUG12ilmMJC85Qh4smZaFFI4WZunUrMbn5lVSDuzZXxpZoHki2OINLBEKRp/fLPK2vb0TzZaR9i4dI8D9CdJbDb4M9I+LKUU8m4Da49Ch3K8JhIxlUiDcFNBxAk2M3OMKe+9ibnNfrr/UDPinjhCPi2SpTD11MbB53vwZZ0xi31KjwVbaApC7oruknHHPDD2I9zo1Y8r/MSfuhup3wPC6D7w/m+OtLtveCiBpW13I321Kt+GWGu6pn2y1ccF+dLzrgENeZ7qPgSE5EE2UVp25oHzott3KBGVFdKR3cRl6cz313lQiSStSUGV/eeIPkje4YxrrYvvPQVa+80Xu+sTDCpD0eA6my5vfNbweqadkqYpjYD4Oa1aufvZ0qUmfirMuzeWhTVA5F7t7fzAdc79KqLZKCorDqFj7mG85aIebvE4xfVpgswgChGeOp2g9Ep663VNb1d0cOnqcDCQv/BA9+jH/LohgQ6VJU6TpsZSQNyfnv0=
