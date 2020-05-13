@@ -29,9 +29,8 @@ def calculate_features(waveforms, sampling_frequency, feature_names=None,
 
     Returns
     -------
-    metrics : pandas.DataFrame  (num_waveforms x num_metrics)
-        one column for each metric
-        one row per waveforms
+    metrics : dict  (num_waveforms x num_metrics)
+        Dictionary with computed metrics. Keys are the metric names, values are the computed features
 
     """
     metrics = dict()
@@ -79,7 +78,8 @@ def peak_to_valley(waveforms, sampling_frequency):
 
     Returns
     -------
-    peak_to_valley in seconds; np.ndarray (num_waveforms)
+    np.ndarray (num_waveforms)
+        peak_to_valley in seconds
 
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
@@ -195,9 +195,9 @@ def repolarization_slope(waveforms, sampling_frequency, return_idx=False):
     Returns
     -------
 
-    np.ndarray or (np.ndarray, np.ndarray, np.ndarray)
-        Halfwidth of the waveforms or (Halfwidth of the waveforms,
-        index_cross_pre_peak, index_cross_post_peak)
+    np.ndarray or (np.ndarray, np.ndarray)
+        Repolarization slope of the waveforms or (Repolarization slope of the waveforms,
+        return to base index)
     """
     trough_idx, peak_idx = _get_trough_and_peak_idx(waveforms)
 
@@ -252,9 +252,8 @@ def recovery_slope(waveforms, sampling_frequency, window):
     Returns
     -------
 
-    np.ndarray or (np.ndarray, np.ndarray, np.ndarray)
-        Halfwidth of the waveforms or (Halfwidth of the waveforms,
-        index_cross_pre_peak, index_cross_post_peak)
+    np.ndarray
+        Recovery slope of the waveforms 
     """
     _, peak_idx = _get_trough_and_peak_idx(waveforms)
     rslope = np.empty(waveforms.shape[0])
