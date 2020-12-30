@@ -253,7 +253,7 @@ def recovery_slope(waveforms, sampling_frequency, window):
     -------
 
     np.ndarray
-        Recovery slope of the waveforms 
+        Recovery slope of the waveforms
     """
     _, peak_idx = _get_trough_and_peak_idx(waveforms)
     rslope = np.empty(waveforms.shape[0])
@@ -291,7 +291,7 @@ def _get_trough_and_peak_idx(waveform):
     trough_idx = np.argmin(waveform, axis=1)
     peak_idx = -1 * np.ones(trough_idx.shape, dtype=int)  # int, these are used for indexing
     for i, tridx in enumerate(trough_idx):
-        if tridx == waveform.shape[1]-1:
+        if tridx == waveform.shape[1] - 1:
             trough_idx[i] = 0
             peak_idx[i] = 0
             continue
