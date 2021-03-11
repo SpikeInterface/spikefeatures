@@ -21,7 +21,7 @@ setup(
     install_requires=[
         'numpy',
         'scipy',
-        'pandas==1.1.5',
+        'pandas',
     ],
     classifiers=(
         "Programming Language :: Python :: 3",
