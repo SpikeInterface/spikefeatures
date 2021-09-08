@@ -1,6 +1,7 @@
-[![Build Status](https://travis-ci.com/SpikeInterface/spikefeatures.svg?branch=master)](https://travis-ci.com/SpikeInterface/spikefeatures) [![PyPI version](https://badge.fury.io/py/spikefeatures.svg)](https://badge.fury.io/py/spikefeatures)
+# spikefeatures (LEGACY)
 
-# SpikeFeatures
-Feature extraction library for extracellular waveforms. 
+The `spikefeatures` package has now been integrated into [spikeinterface](https://github.com/SpikeInterface/spikeinterface).
 
-The base code (and portions of the README images/description) was ported from: https://github.com/AllenInstitute/ecephys_spike_sorting/tree/master/ecephys_spike_sorting/modules/mean_waveforms
+This package will be maintained for a while for bug fixes only, then it will be deprecated.
+
+New features and improvements will only be implemented for the `spikeinterface` package.
